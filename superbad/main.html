@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Турнир</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Добро пожаловать в Турнир!</h1>
+        
+        <button onclick="window.location.href='user.html?login=ivanpetrov123'" class="btn">Мой профиль</button>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Поиск по команде или игроку..." oninput="searchTeams()">
+            <button onclick="sortTeamsByElo('asc')">Сортировать по ELO ↑</button>
+            <button onclick="sortTeamsByElo('desc')">Сортировать по ELO ↓</button>
+        </div>        
+        <div class="tournament-table">
+            <h2>Турнирная таблица</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Место</th>
+                        <th>Команда</th>
+                        <th>Игроки</th>
+                        <th>Очки</th>
+                    </tr>
+                </thead>
+                <tbody id="tournamentBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div id="chat-container">
+        <div id="chat-box">
+            <div id="messages"></div>
+        </div>
+        <input type="text" id="user-input" placeholder="Напишите ваше сообщение..." />
+        <button id="send-button">Отправить</button>
+    </div>
+    
+
+    <script src="js/data.js"></script>
+    <script>
+        const tournamentTable = document.getElementById('tournamentBody');
+        let teams = [...teamsData]; // Создаем копию массива данных
+
+        // Функция для отображения команд в таблице
+        function displayTeams(teams) {
+            tournamentTable.innerHTML = ''; // Очищаем таблицу
+            let rank = 1;
+            teams.forEach(team => {
+                const row = document.createElement('tr');
+                const players = team.players.map(player => 
+                    `<a href="user.html?login=${player.login}">${player.name} (${player.personalElo})</a>`
+                ).join(', ');
+
+                row.innerHTML = `
+                    <td>${rank++}</td>
+                    <td><a href="team.html?id=${team.id}">${team.name}</a></td>
+                    <td>${players}</td>
+                    <td>${team.teamElo}</td>
+                `;
+                tournamentTable.appendChild(row);
+            });
+        }
+
+        // Функция для сортировки команд по ELO
+        function sortTeamsByElo(order) {
+            teams.sort((a, b) => {
+                if (order === 'asc') {
+                    return a.teamElo - b.teamElo;
+                } else {
+                    return b.teamElo - a.teamElo;
+                }
+            });
+            displayTeams(teams); // Обновляем таблицу
+        }
+
+        // Функция для поиска команд или участников
+        function searchTeams() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const filteredTeams = teamsData.filter(team => {
+                const teamNameMatch = team.name.toLowerCase().includes(query);
+                const playerMatch = team.players.some(player => player.name.toLowerCase().includes(query));
+                return teamNameMatch || playerMatch;
+            });
+            displayTeams(filteredTeams); // Обновляем таблицу
+        }
+
+        // Отображаем команды при загрузке страницы
+        displayTeams(teams);
+    </script>
+    <script>
+        document.getElementById('send-button').addEventListener('click', function() {
+    const userInput = document.getElementById('user-input').value;
+    if (userInput.trim() === '') return;
+    
+    // Отображение пользовательского сообщения
+    addMessage(userInput, 'user');
+    document.getElementById('user-input').value = '';
+
+    // Отправка сообщения ИИ
+    getResponse(userInput);
+});
+
+function addMessage(message, sender) {
+    const messageElement = document.createElement('div');
+    messageElement.className = sender === 'user' ? 'user-message' : 'bot-message';
+    messageElement.innerText = message;
+    document.getElementById('messages').appendChild(messageElement);
+    document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight; // Прокрутка вниз
+}
+
+function getResponse(userInput) {
+    const apiKey = 'API'; // Замените на свой API ключ
+
+    fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+            model: 'gpt-3.5-turbo', // Выберите нужную модель
+            messages: [{ role: 'user', content: userInput }]
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const botReply = data.choices[0].message.content; // Получаем ответ от ИИ
+        addMessage(botReply, 'bot'); // Отправляем ответ в чат
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        addMessage('Извините, произошла ошибка.', 'bot');
+    });
+}
+
+    </script>
+    
+</body>
+</html>

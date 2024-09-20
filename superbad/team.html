@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль команды</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Профиль команды</h1>
+        <button onclick="window.location.href='main.html'" class="btn">На главную</button>
+
+        <div class="team-profile">
+            <h2 id="teamName"></h2>
+            <p><strong>Командное ELO:</strong> <span id="teamElo"></span></p>
+            <h3>Участники:</h3>
+            <ul id="playersList"></ul>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const teamId = parseInt(params.get('id'));
+
+        const team = teamsData.find(t => t.id === teamId);
+
+        if (team) {
+            document.getElementById('teamName').innerText = team.name;
+            document.getElementById('teamElo').innerText = team.teamElo;
+
+            const playersList = document.getElementById('playersList');
+            team.players.forEach(player => {
+                const playerItem = document.createElement('li');
+                playerItem.innerHTML = `<a href="user.html?login=${player.login}">${player.name} - ELO: ${player.personalElo}</a>`;
+                playersList.appendChild(playerItem);
+            });
+        } else {
+            document.getElementById('teamName').innerText = "Команда не найдена";
+        }
+    </script>
+</body>
+</html>

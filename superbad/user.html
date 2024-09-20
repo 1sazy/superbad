@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль игрока</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="profile">
+            <h1>Профиль игрока</h1>
+            <div class="user-info">
+                <img src="https://via.placeholder.com/150" alt="Avatar" class="avatar">
+                <h2 id="userName"></h2> <!-- Имя пользователя -->
+                <p id="userLogin"></p> <!-- Логин пользователя -->
+                <p>Команда: <a href="#" id="teamLink"><span id="teamName"></span></a></p>
+                <p id="teamElo"></p> <!-- Командное Elo -->
+                <p id="personalElo"></p> <!-- Личное Elo -->
+            </div>
+            <button onclick="window.location.href='main.html'" class="btn">На главную</button>
+        </div>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const login = params.get('login');
+
+        let foundPlayer = null;
+        teamsData.forEach(team => {
+            team.players.forEach(player => {
+                if (player.login === login) {
+                    foundPlayer = { ...player, teamName: team.name, teamElo: team.teamElo, teamId: team.id };
+                }
+            });
+        });
+
+        if (foundPlayer) {
+            document.getElementById('userName').innerText = foundPlayer.name;
+            document.getElementById('userLogin').innerText = `Логин: ${foundPlayer.login}`;
+            document.getElementById('teamName').innerText = foundPlayer.teamName;
+            document.getElementById('teamLink').href = `team.html?id=${foundPlayer.teamId}`;
+            document.getElementById('personalElo').innerText = `Личное ELO: ${foundPlayer.personalElo}`;
+            document.getElementById('teamElo').innerText = `Командное ELO: ${foundPlayer.teamElo}`;
+        } else {
+            document.getElementById('userName').innerText = "Пользователь не найден";
+        }
+    </script>
+</body>
+</html>
