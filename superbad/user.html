@@ -11,12 +11,16 @@
         <div class="profile">
             <h1>Профиль игрока</h1>
             <div class="user-info">
-                <img src="https://via.placeholder.com/150" alt="Avatar" class="avatar">
+                <img src="https://via.placeholder.com/150" alt="Avatar" class="avatar" id="avatarImage">
                 <h2 id="userName"></h2> <!-- Имя пользователя -->
                 <p id="userLogin"></p> <!-- Логин пользователя -->
                 <p>Команда: <a href="#" id="teamLink"><span id="teamName"></span></a></p>
                 <p id="teamElo"></p> <!-- Командное Elo -->
                 <p id="personalElo"></p> <!-- Личное Elo -->
+                
+                <!-- Поле загрузки аватара -->
+                <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                <button id="uploadButton">Загрузить аватар</button>
             </div>
             <button onclick="window.location.href='main.html'" class="btn">На главную</button>
         </div>
@@ -46,6 +50,22 @@
         } else {
             document.getElementById('userName').innerText = "Пользователь не найден";
         }
+
+        // Код для загрузки аватара
+        document.getElementById('uploadButton').addEventListener('click', function() {
+            document.getElementById('avatarInput').click(); // Имитируем клик по полю загрузки
+        });
+
+        document.getElementById('avatarInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarImage').src = e.target.result; // Заменяем источник изображения на загруженный
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     </script>
 </body>
 </html>
